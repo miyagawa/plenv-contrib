@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+[ -n "$PLENV_DEBUG" ] && set -x
+
+for path in "${PLENV_ROOT}/versions/"*; do
+  if [ -d "$path" ]; then
+    PLENV_VERSION="${path##*/}" plenv exec "$@"
+  fi
+done
