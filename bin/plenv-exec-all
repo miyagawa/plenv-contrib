@@ -5,6 +5,9 @@ set -e
 
 for path in "${PLENV_ROOT}/versions/"*; do
   if [ -d "$path" ]; then
+    echo "${path##*/}"
+    echo "=========="
     PLENV_VERSION="${path##*/}" plenv exec "$@"
+    echo
   fi
 done
