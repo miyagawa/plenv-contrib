@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+use strict;
+
+sub current_perl {
+    chomp(my $version = `plenv version-name`);
+    $version;
+}
+
+sub resolve_name {
+    my $name = shift;
+
+    my($perl_ver, $lib_name) = split /@/, $name, 2;
+    $perl_ver ||= current_perl;
+
+    ($perl_ver, $lib_name);
+}
+
+my $perl_with_lib = shift
+    or die "Usage: plenv use perl-version[\@lib]\n";
+
+my($perl_ver, $lib_name) = resolve_name($perl_with_lib);
+
+if ($lib_name) {
+    my $local_lib = "$ENV{PLENV_ROOT}/libs/$perl_ver\@$lib_name";
+    die "lib $perl_ver\@$lib_name doesn't exist. Create it first with 'plenv lib create'"
+        unless -d $local_lib;
+    require local::lib;
+    my %env = local::lib->build_environment_vars_for($local_lib, 0, 0);
+    @ENV{keys %env} = values %env;
+}
+
+$ENV{PLENV_VERSION} = $perl_ver;
+
+print "\nA sub-shell is launched with PLENV_VERSION=$perl_ver";
+print " and local::lib activated for \@$lib_name" if $lib_name;
+print ". Run 'exit' to finish it.\n\n";
+
+exec $ENV{SHELL};

@@ -1,0 +1,67 @@
+#!/usr/bin/env perl
+use strict;
+use File::Basename qw(basename);
+use File::Path qw(rmtree);
+
+my $cmd = shift @ARGV || "list";
+
+{
+    no strict 'refs';
+    my $command = defined &{"cmd_$cmd"}
+      ? sub { "cmd_$cmd"->(@_) } : sub { die "No such command: plenv lib $cmd\n" };
+    $command->(@ARGV);
+}
+
+sub cmd_list {
+    for my $name (glob "$ENV{PLENV_ROOT}/libs/*") {
+        print basename($name), "\n";
+    }
+}
+
+sub current_perl {
+    chomp(my $version = `plenv version-name`);
+    $version;
+}
+
+sub resolve_name {
+    my $name = shift;
+
+    my($perl_ver, $lib_name) = split /@/, $name, 2;
+    $perl_ver ||= current_perl;
+
+    ($perl_ver, $lib_name);
+}
+
+sub cmd_create {
+    my $lib = shift
+      or die "Usage: plenv lib create [perl-version@]name\n";
+
+    $lib = '@' . $lib unless $lib =~ /@/;
+    my($perl_ver, $lib_name) = resolve_name($lib);
+
+    my $target = "$ENV{PLENV_ROOT}/libs/$perl_ver\@$lib_name";
+    if (-d $target) {
+        die "lib $perl_ver\@$lib_name already exists.\n";
+    }
+
+    warn "Creating lib '$lib_name' for $perl_ver\n";
+    {
+        require local::lib;
+        local @INC = @INC;
+        local::lib->setup_local_lib_for($target, 0);
+    }
+}
+
+sub cmd_delete {
+    my $lib = shift
+      or die "Usage: plenv lib delete [perl-version@]name\n";
+
+    $lib = '@' . $lib unless $lib =~ /@/;
+    my($perl_ver, $lib_name) = resolve_name($lib);
+
+    my $target = "$ENV{PLENV_ROOT}/libs/$perl_ver\@$lib_name";
+    die "lib '$target' doesn't exist.\n" unless -d $target;
+
+    rmtree [$target], 0, 0;
+    print "lib '$target' is deleted.\n";
+}
