@@ -39,7 +39,8 @@ sub cmd_create {
     {
         require local::lib;
         local @INC = @INC;
-        local::lib->setup_local_lib_for($target, 0);
+        local::lib->setup_local_lib_for($target,
+            ($local::lib::VERSION > 1.008026) ? () : (0));
     }
 }
 
