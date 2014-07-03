@@ -25,7 +25,9 @@ if ($lib_name) {
     die "lib $perl_ver\@$lib_name doesn't exist. Create it first with 'plenv lib create'"
         unless -d $local_lib;
     require local::lib;
-    my %env = local::lib->build_environment_vars_for($local_lib, 0, local::lib->INTERPOLATE_ENV);
+    my %env = local::lib->build_environment_vars_for($local_lib,
+        ($local::lib::VERSION > 1.008026) ? () : (0, local::lib->INTERPOLATE_ENV));
+
     @ENV{keys %env} = values %env;
 }
 
