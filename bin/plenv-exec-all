@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+#
+# Summary: Runs specified command for all installed plenv versions
+#
+# Usage: plenv exec-all <command> <arg> ...
+#        plenv exec-all prove t/foo.t
+#
+# Runs specified command for all installed plenv versions,
+# a'la perlbrew exec.
 
 set -e
 [ -n "$PLENV_DEBUG" ] && set -x

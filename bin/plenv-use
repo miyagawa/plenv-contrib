@@ -1,4 +1,16 @@
 #!/usr/bin/env perl
+#
+# Summary: Launches a new shell with specified perl and/or local::lib path
+#
+# Usage: plenv use perl-version@lib
+#        plenv use perl-version
+#        plenv use @lib
+#
+# Launches a new shell with specified perl version. When the '@lib' part is
+# specified, the local::lib name created with plenv lib is also activated.
+#
+# When the perl version is empty, the current perl version is used.
+
 use strict;
 
 sub current_perl {

@@ -1,4 +1,14 @@
 #!/usr/bin/env perl
+#
+# Summary: Manages local::lib paths for each Perl version
+#
+# Usage: plenv lib list
+#        plenv lib create [perl-version@]name
+#        plenv lib delete [perl-version@]name
+#
+# Manages local::lib paths, separately to each installed perl.
+# When no 'perl-version@' part is given the current perl is assumed.
+
 use strict;
 use File::Basename qw(basename);
 use File::Path qw(rmtree);
