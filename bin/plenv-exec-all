@@ -45,7 +45,7 @@ while [ "${1:0:2}" == "--" ]; do
   fi
 done
 
-if [[ -z "$@" ]]; then
+if [ "$#" -eq 0 ]; then
   echo "Usage: plenv exec-all [--with <versions>] [--except <versions>] <command> <arg> ..."
   exit 1
 fi
@@ -53,8 +53,8 @@ fi
 for path in "${PLENV_ROOT}/versions/"*; do
   if [ -d "$path" ]; then
     this_version="${path##*/}"
-    if [ -n "$except_versions" ] && array_contains "$this_version" "${except_versions[@]}"; then continue; fi
-    if [ -n "$with_versions" ] && ! array_contains "$this_version" "${with_versions[@]}"; then continue; fi
+    if [ ${#except_versions[@]} -ne 0 ] && array_contains "$this_version" "${except_versions[@]}"; then continue; fi
+    if [ ${#with_versions[@]} -ne 0 ] && ! array_contains "$this_version" "${with_versions[@]}"; then continue; fi
     echo "$this_version"
     echo "=========="
     PLENV_VERSION="$this_version" plenv exec "$@"
