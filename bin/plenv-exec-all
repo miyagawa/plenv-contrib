@@ -22,7 +22,7 @@ array_contains () {
 # Options
 unset with_versions
 unset except_versions
-while [[ "${1:0:2}" == "--" ]]; do
+while [ "${1:0:2}" == "--" ]; do
   if [ "$1" == "--with" ]; then
     if [ -n "$2" ]; then
       with_versions=("${with_versions[@]}" "${2//,/ }")
@@ -45,7 +45,7 @@ while [[ "${1:0:2}" == "--" ]]; do
   fi
 done
 
-if [ -z "$@" ]; then
+if [[ -z "$@" ]]; then
   echo "Usage: plenv exec-all [--with <versions>] [--except <versions>] <command> <arg> ..."
   exit 1
 fi
