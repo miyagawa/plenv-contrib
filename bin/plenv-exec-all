@@ -2,20 +2,57 @@
 #
 # Summary: Runs specified command for all installed plenv versions
 #
-# Usage: plenv exec-all <command> <arg> ...
-#        plenv exec-all prove t/foo.t
+# Usage: plenv exec-all [--with <versions>] [--except <versions>] <command> <arg> ...
+#        plenv exec-all --with 5.20.0,5.22.0 prove t/foo.t
 #
 # Runs specified command for all installed plenv versions,
-# a'la perlbrew exec.
+# a'la perlbrew exec. Optional --with or --except options
+# can be passed to specify which versions to run on or to
+# exclude as comma-separated lists.
 
 set -e
 [ -n "$PLENV_DEBUG" ] && set -x
 
+array_contains () {
+  local elem
+  for elem in ${@:2}; do [ "$elem" == "$1" ] && return 0; done
+  return 1
+}
+
+# Options
+unset with_versions
+unset except_versions
+while [[ "${1:0:2}" == "--" ]]; do
+  if [ "$1" == "--with" ]; then
+    if [ -n "$2" ]; then
+      with_versions=("${with_versions[@]}" "${2//,/ }")
+    else
+      echo "No argument to --with"
+      exit 1
+    fi
+    shift 2
+  elif [ "$1" == "--except" ]; then
+    if [ -n "$2" ]; then
+      except_versions=("${except_versions[@]}" "${2//,/ }")
+    else
+      echo "No argument to --except"
+      exit 1
+    fi
+    shift 2
+  else
+    echo "Unknown option $1"
+    exit 1
+  fi
+done
+
 for path in "${PLENV_ROOT}/versions/"*; do
   if [ -d "$path" ]; then
-    echo "${path##*/}"
+    this_version="${path##*/}"
+    if [ -n "$except_versions" ] && array_contains "$this_version" "${except_versions[@]}"; then continue; fi
+    if [ -n "$with_versions" ] && ! array_contains "$this_version" "${with_versions[@]}"; then continue; fi
+    echo "$this_version"
     echo "=========="
-    PLENV_VERSION="${path##*/}" plenv exec "$@"
+    PLENV_VERSION="$this_version" plenv exec "$@"
     echo
   fi
 done
