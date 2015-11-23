@@ -45,6 +45,11 @@ while [[ "${1:0:2}" == "--" ]]; do
   fi
 done
 
+if [ -z "$@" ]; then
+  echo "Usage: plenv exec-all [--with <versions>] [--except <versions>] <command> <arg> ..."
+  exit 1
+fi
+
 for path in "${PLENV_ROOT}/versions/"*; do
   if [ -d "$path" ]; then
     this_version="${path##*/}"
