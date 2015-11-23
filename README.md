@@ -13,10 +13,12 @@ git clone git://github.com/miyagawa/plenv-contrib.git ~/.plenv/plugins/plenv-con
 
 ### exec-all
 
-Runs specified command for all installed plenv versions, a la `perlbrew exec`.
+Runs specified command for all installed plenv versions, a la `perlbrew exec`. Use `--with` to specify versions explicitly, or `--except` to exclude versions.
 
 ```
 > plenv exec-all prove t/foo.t
+> plenv exec-all --with 5.10.1,5.20.2 prove t/foo.t
+> plenv exec-all --except 5.8.9 prove t/foo.t
 ```
 
 ### lib
