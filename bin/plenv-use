@@ -51,8 +51,8 @@ fi
 
 resolve_name "$perl_with_lib"
 
-echo ; echo -n  "A sub-shell is launched with PLENV_VERSION=$PLENV_VERSION"
+echo -ne "\nA sub-shell is launched with PLENV_VERSION=$PLENV_VERSION"
 test -n "$PLENV_USE_LIB" && echo -n " and PLENV_USE_LIB=$PLENV_USE_LIB"
-echo ". Run 'exit' to finish it.\n\n";
+echo -e ". Run 'exit' to finish it.\n\n";
 
 exec "$SHELL"
