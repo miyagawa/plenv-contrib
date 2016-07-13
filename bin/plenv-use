@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/env bash
 #
 # Summary: Launches a new shell with specified perl and/or local::lib path
 #
@@ -11,42 +11,48 @@
 #
 # When the perl version is empty, the current perl version is used.
 
-use strict;
+resolve_name () {
 
-sub current_perl {
-    chomp(my $version = `plenv version-name`);
-    $version;
+    local name=$1
+
+    local sIFS=$IFS
+    IFS='|'
+    read perl_ver lib_name < <(perl -e "\$,=q[|]; print split /@/, q[$name], 2" )
+    IFS="$sIFS"
+
+    test -z "$perl_ver" && perl_ver="$(plenv version-name)"
+
+    if ! plenv prefix "$perl_ver" > /dev/null ; then
+	exit 1
+    fi
+
+    export PLENV_VERSION="$perl_ver"
+
+    if [ -n "$lib_name" ]; then
+	local lib=$PLENV_VERSION@$lib_name
+	local local_lib=$PLENV_ROOT/libs/$lib
+
+	if [ ! -d $local_lib ] ; then
+	    echo "lib $lib doesn't exist. Create it first with 'plenv lib create $lib'" >&2
+	    exit 1
+	fi
+
+	export PLENV_USE_LIB="$lib_name"
+    fi
+
 }
 
-sub resolve_name {
-    my $name = shift;
+perl_with_lib=$1
 
-    my($perl_ver, $lib_name) = split /@/, $name, 2;
-    $perl_ver ||= current_perl;
+if [ -z "$perl_with_lib" ] ; then
+    echo "Usage: plenv use perl-version[\@lib]" >&2
+    exit 1
+fi
 
-    ($perl_ver, $lib_name);
-}
+resolve_name "$perl_with_lib"
 
-my $perl_with_lib = shift
-    or die "Usage: plenv use perl-version[\@lib]\n";
+echo -ne "\nA sub-shell is launched with PLENV_VERSION=$PLENV_VERSION"
+test -n "$PLENV_USE_LIB" && echo -n " and PLENV_USE_LIB=$PLENV_USE_LIB"
+echo -e ". Run 'exit' to finish it.\n\n";
 
-my($perl_ver, $lib_name) = resolve_name($perl_with_lib);
-
-if ($lib_name) {
-    my $local_lib = "$ENV{PLENV_ROOT}/libs/$perl_ver\@$lib_name";
-    die "lib $perl_ver\@$lib_name doesn't exist. Create it first with 'plenv lib create'"
-        unless -d $local_lib;
-    require local::lib;
-    my %env = local::lib->build_environment_vars_for($local_lib,
-        ($local::lib::VERSION > 1.008026) ? () : (0, local::lib->INTERPOLATE_ENV));
-
-    @ENV{keys %env} = values %env;
-}
-
-$ENV{PLENV_VERSION} = $perl_ver;
-
-print "\nA sub-shell is launched with PLENV_VERSION=$perl_ver";
-print " and local::lib activated for \@$lib_name" if $lib_name;
-print ". Run 'exit' to finish it.\n\n";
-
-exec $ENV{SHELL};
+exec "$SHELL"
