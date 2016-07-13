@@ -3,8 +3,8 @@
 #
 
 if [ -n "$PLENV_USE_LIB" ]; then
-    local lib=${PLENV_VERSION}@${PLENV_USE_LIB}
-    local local_lib=$PLENV_ROOT/libs/$lib
+    lib=${PLENV_VERSION}@${PLENV_USE_LIB}
+    local_lib=$PLENV_ROOT/libs/$lib
 
     if [ ! -d "$local_lib" ]; then
 
