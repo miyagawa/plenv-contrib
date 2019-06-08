@@ -1,0 +1,4 @@
+
+if [ -n "$PERL_LOCAL_LIB_ROOT" -a -x "${PERL_LOCAL_LIB_ROOT}/bin/${PLENV_COMMAND}" ] ; then
+    PLENV_COMMAND_PATH="${PERL_LOCAL_LIB_ROOT}/bin/${PLENV_COMMAND}"
+fi
