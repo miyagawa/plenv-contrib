@@ -2,7 +2,7 @@
 #
 # Summary: Runs specified command for all installed plenv versions
 #
-# Usage: plenv exec-all [--with <versions>] [--except <versions>] <command> <arg> ...
+# Usage: plenv exec-all [--with <versions>] [--except <versions>] [--match <glob>] <command> <arg> ...
 #        plenv exec-all --with 5.20.0,5.22.0 prove t/foo.t
 #
 # Runs specified command for all installed plenv versions,
@@ -22,6 +22,7 @@ array_contains () {
 # Options
 unset with_versions
 unset except_versions
+unset match_versions
 while [ "${1:0:2}" == "--" ]; do
   if [ "$1" == "--with" ]; then
     if [ -n "$2" ]; then
@@ -39,6 +40,14 @@ while [ "${1:0:2}" == "--" ]; do
       exit 1
     fi
     shift 2
+  elif [ "$1" == "--match" ]; then
+    if [ -n "$2" ]; then
+      match_versions="$2"
+    else
+      echo "No argument to --match"
+      exit 1
+    fi
+    shift 2
   else
     echo "Unknown option $1"
     exit 1
@@ -46,11 +55,12 @@ while [ "${1:0:2}" == "--" ]; do
 done
 
 if [ "$#" -eq 0 ]; then
-  echo "Usage: plenv exec-all [--with <versions>] [--except <versions>] <command> <arg> ..."
+  echo "Usage: plenv exec-all [--with <versions>] [--except <versions>] [--match <glob>] <command> <arg> ..."
   exit 1
 fi
 
-for path in "${PLENV_ROOT}/versions/"*; do
+shopt -s extglob # Allow --match 5.@(18|22|30)
+for path in "${PLENV_ROOT}/versions/"${match_versions-*}; do
   if [ -d "$path" ]; then
     this_version="${path##*/}"
     if [ ${#except_versions[@]} -ne 0 ] && array_contains "$this_version" "${except_versions[@]}"; then continue; fi
